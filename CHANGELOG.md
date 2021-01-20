@@ -23,6 +23,8 @@ All notable changes to this project will be documented in this file. This projec
   - Allows for Adding Rotation Speed Characteristic If Fan Supports it, This will effect all Fans.
   - Allows for Adding Swing Mode Characteristic If Fan Supports it, This will effect all Fans.
 - Adds Support for IR Lights
+- Adds Support for IR Cameras.
+- Adds Support for IR Vacuum Cleaners.
 - Adds Support for IR Air Conditioners.
 - Adds Support for IR Air Purifiers.
 - Adds Support for IR Water Heaters.

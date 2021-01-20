@@ -74,6 +74,18 @@ plugin allows you to access your SwitchBot Device(s) from HomeKit with
     - Allows for On/Off Controls
     - Optional Rotation Speed
     - Optional Swing Mode
+- Lights    
+    - Allows for On/Off Controls
+- Air Purifiers
+    - Allows for On/Off Controls
+- Air Conditioners
+    - Allows for On/Off, Tempeture, and Mode Controls
+- Cameras    
+    - Allows for On/Off Controls
+- Vacuum Cleaners    
+    - Allows for On/Off Controls
+- Water Heaters    
+    - Allows for On/Off Controls       
 
 ## SwitchBotAPI
 
