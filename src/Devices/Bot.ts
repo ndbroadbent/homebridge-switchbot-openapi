@@ -66,7 +66,7 @@ export class Bot {
 
     this.service
       .getCharacteristic(this.platform.Characteristic.On)
-      .on(CharacteristicEventTypes.SET, this.handleOnSet.bind(this));  
+      .on(CharacteristicEventTypes.SET, this.handleOnSet.bind(this));
 
     // Retrieve initial values and updateHomekit
     this.updateHomeKitCharacteristics();
@@ -103,15 +103,10 @@ export class Bot {
    */
   parseStatus() {
     this.OutletInUse = true;
-    if (this.platform.config.options?.bot?.device_press?.includes(this.device.deviceId)){
+    if (this.platform.config.options?.bot?.device_press?.includes(this.device.deviceId)) {
       this.On = false;
     }
-    this.platform.log.debug(
-      'Bot %s OutletInUse: %s On: %s',
-      this.accessory.displayName,
-      this.OutletInUse,
-      this.On,
-    );
+    this.platform.log.debug('Bot %s OutletInUse: %s On: %s', this.accessory.displayName, this.OutletInUse, this.On);
   }
 
   /**
@@ -121,7 +116,7 @@ export class Bot {
     try {
       // this.platform.log.error('Bot - Reading', `${DeviceURL}/${this.device.deviceID}/devices`);
       const deviceStatus: any = {
-        statusCode:100,
+        statusCode: 100,
         body: {
           deviceId: this.device.deviceId,
           deviceType: this.device.deviceType,
@@ -133,7 +128,6 @@ export class Bot {
       this.deviceStatus = deviceStatus;
       this.parseStatus();
       this.updateHomeKitCharacteristics();
-      
     } catch (e) {
       this.platform.log.error(
         `Bot - Failed to update status of ${this.device.deviceName}`,
@@ -156,7 +150,6 @@ export class Bot {
       parameter: 'default',
     } as any;
 
-    
     if (this.platform.config.options?.bot?.device_switch?.includes(this.device.deviceId) && this.On) {
       payload.command = 'turnOn';
       this.On = true;
@@ -195,14 +188,8 @@ export class Bot {
    * Updates the status for each of the HomeKit Characteristics
    */
   updateHomeKitCharacteristics() {
-    this.service.updateCharacteristic(
-      this.platform.Characteristic.On,
-      this.On,
-    );
-    this.service.updateCharacteristic(
-      this.platform.Characteristic.OutletInUse,
-      this.OutletInUse,
-    );
+    this.service.updateCharacteristic(this.platform.Characteristic.On, this.On);
+    this.service.updateCharacteristic(this.platform.Characteristic.OutletInUse, this.OutletInUse);
   }
 
   /**
@@ -215,5 +202,4 @@ export class Bot {
     this.service.updateCharacteristic(this.platform.Characteristic.On, this.On);
     callback(null);
   }
-
 }

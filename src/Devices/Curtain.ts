@@ -12,12 +12,11 @@ export class Curtain {
   PositionState!: number;
   TargetPosition!: number;
   deviceStatus!: deviceStatusResponse;
+  setNewTarget!: boolean;
+  setNewTargetTimer!: NodeJS.Timeout;
 
   curtainUpdateInProgress!: boolean;
   doCurtainUpdate!: any;
-
-  setNewTarget!: boolean;
-  setNewTargetTimer!: NodeJS.Timeout;
 
   constructor(
     private readonly platform: SwitchBotPlatform,
@@ -68,14 +67,18 @@ export class Curtain {
     // create handlers for required characteristics
     this.service.setCharacteristic(this.platform.Characteristic.PositionState, this.PositionState);
 
-    this.service.setCharacteristic(this.platform.Characteristic.CurrentPosition, this.CurrentPosition);
+    this.service.getCharacteristic(this.platform.Characteristic.CurrentPosition)
+      .setProps({
+        minValue: this.platform.config.options?.curtain?.set_min || 0,
+        maxValue: this.platform.config.options?.curtain?.set_max || 100,
+        validValueRanges: [0, 100],
+      })
+      .on('get', this.handleCurrentPositionGet.bind(this));
 
     this.service
       .getCharacteristic(this.platform.Characteristic.TargetPosition)
       .setProps({
         minStep: this.platform.config.options?.curtain?.set_minStep || 1,
-        minValue: this.platform.config.options?.curtain?.set_min || 0,
-        maxValue: this.platform.config.options?.curtain?.set_max || 100,
         validValueRanges: [0, 100],
       })
       .on(CharacteristicEventTypes.SET, this.handleTargetPositionSet.bind(this));
@@ -131,6 +134,10 @@ export class Curtain {
       this.CurrentPosition,
     );
 
+    if (!this.deviceStatus.body.calibrate) {
+      this.platform.log.warn('Your Curtains need to be recalibrated');
+    }
+
     // this.platform.log.info(
     //   'Curtain %s -',
     //   this.accessory.displayName,
@@ -147,7 +154,6 @@ export class Curtain {
     // );
     // PositionState
     if (this.deviceStatus.body.moving) {
-      this.setNewTarget = false;
       if (this.TargetPosition > this.CurrentPosition) {
         this.platform.log.debug(
           'Curtain %s -',
@@ -259,8 +265,19 @@ export class Curtain {
     this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, this.TargetPosition);
   }
 
+  /**
+   * Handle requests to get the current value of the "Current Position" characteristic
+   */
+  handleCurrentPositionGet(callback) {
+    this.platform.log.debug('Curtain %s - Getting CurrentPosition', this.accessory.displayName);
+
+    // set this to a valid value for CurrentPosition
+    const currentValue = this.CurrentPosition;
+    callback(null, currentValue);
+  }
+
   handleTargetPositionSet(value, callback) {
-    this.platform.log.debug('Curtain %s -', this.accessory.displayName, `Set TargetPosition: ${value}`);
+    this.platform.log.debug('Curtain %s - Set TargetPosition: %s', this.accessory.displayName, value);
 
     this.TargetPosition = value;
     this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, this.TargetPosition);
