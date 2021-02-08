@@ -75,18 +75,18 @@ export class Fan {
       });
 
     if (this.platform.config.options?.fan?.rotation_speed?.includes(device.deviceId)) {
-      if (this.platform.config.options?.fan?.set_minStep?.set_minStep_device) {
-        this.minStep = this.platform.config.options?.fan?.set_minStep?.set_minStep;
+      if (this.platform.config.options?.fan?.set_minStep) {
+        this.minStep = this.platform.config.options?.fan?.set_minStep;
       } else {
         this.minStep = 1;
       }
-      if (this.platform.config.options?.fan?.set_min?.set_min_device) {
-        this.minValue = this.platform.config.options?.fan?.set_min?.set_min;
+      if (this.platform.config.options?.fan?.set_min) {
+        this.minValue = this.platform.config.options?.fan?.set_min;
       } else {
         this.minValue = 1;
       }
-      if (this.platform.config.options?.fan?.set_max?.set_max_device) {
-        this.maxValue = this.platform.config.options?.fan?.set_max?.set_max;
+      if (this.platform.config.options?.fan?.set_max) {
+        this.maxValue = this.platform.config.options?.fan?.set_max;
       } else {
         this.maxValue = 100;
       }
@@ -215,20 +215,30 @@ export class Fan {
   }
 
   public async pushTVChanges(payload: any) {
-    this.platform.log.info(
-      'Sending request for',
-      this.accessory.displayName,
-      'to SwitchBot API. command:',
-      payload.command,
-      'parameter:',
-      payload.parameter,
-      'commandType:',
-      payload.commandType,
-    );
-    this.platform.log.debug('TV %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
+    try {
+      this.platform.log.info(
+        'Sending request for',
+        this.accessory.displayName,
+        'to SwitchBot API. command:',
+        payload.command,
+        'parameter:',
+        payload.parameter,
+        'commandType:',
+        payload.commandType,
+      );
+      this.platform.log.debug('TV %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
 
-    // Make the API request
-    const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
-    this.platform.log.debug('TV %s Changes pushed -', this.accessory.displayName, push.data);
+      // Make the API request
+      const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
+      this.platform.log.debug('TV %s Changes pushed -', this.accessory.displayName, push.data);
+    } catch (e) {
+      this.apiError(e);
+    }
+  }
+
+  public apiError(e: any) {
+    this.service.updateCharacteristic(this.platform.Characteristic.Active, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.RotationSpeed, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.SwingMode, e);
   }
 }

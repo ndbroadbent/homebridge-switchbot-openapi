@@ -97,6 +97,9 @@ export class Humidifier {
 
     this.service
       .getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
+      .setProps({
+        minStep: this.platform.config.options?.humidifier?.set_minStep || 1,
+      })
       .on(CharacteristicEventTypes.SET, this.handleRelativeHumidityHumidifierThresholdSet.bind(this));
 
     this.service
@@ -110,7 +113,6 @@ export class Humidifier {
     `${this.device.deviceName} ${this.device.deviceType} Temperature Sensor`;
 
     // Retrieve initial values and updateHomekit
-    //this.refreshStatus();
     this.updateHomeKitCharacteristics();
 
     // Start an update interval
@@ -135,6 +137,7 @@ export class Humidifier {
         } catch (e) {
           this.platform.log.error(JSON.stringify(e.message));
           this.platform.log.debug('Humidifier %s -', this.accessory.displayName, JSON.stringify(e));
+          this.apiError(e);
         }
         this.humidifierUpdateInProgress = false;
       });
@@ -256,6 +259,7 @@ export class Humidifier {
         JSON.stringify(e.message),
         this.platform.log.debug('Humidifier %s -', this.accessory.displayName, JSON.stringify(e)),
       );
+      this.apiError(e);
     }
   }
 
@@ -337,6 +341,7 @@ export class Humidifier {
     } catch (e) {
       this.platform.log.error(JSON.stringify(e.message));
       this.platform.log.debug('Humidifier %s -', this.accessory.displayName, JSON.stringify(e));
+      this.apiError(e);
     }
   }
 
@@ -376,6 +381,7 @@ export class Humidifier {
     } catch (e) {
       this.platform.log.error(JSON.stringify(e.message));
       this.platform.log.debug('Humidifier %s -', this.accessory.displayName, JSON.stringify(e));
+      this.apiError(e);
     }
   }
 
@@ -476,5 +482,16 @@ export class Humidifier {
     }, 100);
 
     callback(null);
+  }
+
+  public apiError(e: any) {
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.WaterLevel, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.Active, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.LockPhysicalControls, e);
+    this.temperatureservice.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, e);
   }
 }

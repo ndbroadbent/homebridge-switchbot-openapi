@@ -1,9 +1,10 @@
 import { Service, PlatformAccessory, CharacteristicEventTypes } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
-import { interval, Subject } from 'rxjs';
-import { debounceTime, skipWhile, tap } from 'rxjs/operators';
+import { interval } from 'rxjs';
+import { skipWhile } from 'rxjs/operators';
 import { DeviceURL } from '../settings';
 import { device, deviceStatusResponse } from '../configTypes';
+import Queue = require('better-queue');
 
 export class Curtain {
   private service: Service;
@@ -16,7 +17,8 @@ export class Curtain {
   setNewTargetTimer!: NodeJS.Timeout;
 
   curtainUpdateInProgress!: boolean;
-  doCurtainUpdate!: any;
+  doCurtainUpdate: Queue;
+
 
   constructor(
     private readonly platform: SwitchBotPlatform,
@@ -24,12 +26,15 @@ export class Curtain {
     public device: device,
   ) {
     // default placeholders
-    this.CurrentPosition = 100;
+    this.setMinMax();
+    this.CurrentPosition = 0;
+    this.TargetPosition = 0;
     this.PositionState = this.platform.Characteristic.PositionState.STOPPED;
-    this.TargetPosition = 100;
 
     // this is subject we use to track when we need to POST changes to the SwitchBot API
-    this.doCurtainUpdate = new Subject();
+    this.doCurtainUpdate = new Queue(this.pushChanges.bind(this), {
+      afterProcessDelay: (this.platform.config.options!.pushRate! * 1000), 
+    });
     this.curtainUpdateInProgress = false;
     this.setNewTarget = false;
 
@@ -67,13 +72,7 @@ export class Curtain {
     // create handlers for required characteristics
     this.service.setCharacteristic(this.platform.Characteristic.PositionState, this.PositionState);
 
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentPosition)
-      .setProps({
-        minValue: this.platform.config.options?.curtain?.set_min || 0,
-        maxValue: this.platform.config.options?.curtain?.set_max || 100,
-        validValueRanges: [0, 100],
-      })
-      .on('get', this.handleCurrentPositionGet.bind(this));
+    this.service.setCharacteristic(this.platform.Characteristic.CurrentPosition, this.CurrentPosition);
 
     this.service
       .getCharacteristic(this.platform.Characteristic.TargetPosition)
@@ -103,30 +102,13 @@ export class Curtain {
         this.platform.log.debug('Refresh status when moving', this.PositionState);
         this.refreshStatus();
       });
-
-    // Watch for Curtain change events
-    // We put in a debounce of 100ms so we don't make duplicate calls
-    this.doCurtainUpdate
-      .pipe(
-        tap(() => {
-          this.curtainUpdateInProgress = true;
-        }),
-        debounceTime(100),
-      )
-      .subscribe(async () => {
-        try {
-          await this.pushChanges();
-        } catch (e) {
-          this.platform.log.error(JSON.stringify(e.message));
-          this.platform.log.debug('Curtain %s -', this.accessory.displayName, JSON.stringify(e));
-        }
-        this.curtainUpdateInProgress = false;
-      });
   }
 
   parseStatus() {
     // CurrentPosition
-    this.CurrentPosition = this.set_maxCurrentOption() - this.deviceStatus.body.slidePosition;
+    this.setMinMax();
+    this.CurrentPosition = 100 - this.deviceStatus.body.slidePosition;
+    this.setMinMax();
     this.platform.log.debug(
       'Curtain %s CurrentPosition -',
       this.accessory.displayName,
@@ -134,25 +116,6 @@ export class Curtain {
       this.CurrentPosition,
     );
 
-    if (!this.deviceStatus.body.calibrate) {
-      this.platform.log.warn('Your Curtains need to be recalibrated');
-    }
-
-    // this.platform.log.info(
-    //   'Curtain %s -',
-    //   this.accessory.displayName,
-    //   'Current position:',
-    //   this.CurrentPosition,
-    //   'target position',
-    //   this.TargetPosition,
-    //   'moving',
-    //   this.deviceStatus.body.moving,
-    //   'setNewTarget',
-    //   this.setNewTarget,
-    //   'state',
-    //   this.PositionState
-    // );
-    // PositionState
     if (this.deviceStatus.body.moving) {
       if (this.TargetPosition > this.CurrentPosition) {
         this.platform.log.debug(
@@ -205,7 +168,7 @@ export class Curtain {
           this.accessory.displayName,
           JSON.stringify(this.deviceStatus),
         );
-
+        this.setMinMax();
         this.parseStatus();
         this.updateHomeKitCharacteristics();
       }
@@ -215,39 +178,45 @@ export class Curtain {
         JSON.stringify(e.message),
         this.platform.log.debug('Curtain %s -', this.accessory.displayName, JSON.stringify(e)),
       );
+      this.apiError(e);
     }
   }
 
-  async pushChanges() {
-    if (this.TargetPosition !== this.CurrentPosition) {
-      this.platform.log.debug(`Pushing ${this.TargetPosition}`);
-      const adjustedTargetPosition = this.set_maxCurrentOption() - this.TargetPosition;
-      const payload = {
-        commandType: 'command',
-        command: 'setPosition',
-        parameter: `0,ff,${adjustedTargetPosition}`,
-      } as any;
+  async pushChanges(value, callback) {
+    try {
+      this.curtainUpdateInProgress = true;
+      if (value.value !== this.CurrentPosition) {
+        this.platform.log.debug(`Pushing ${value.value}`);
+        const adjustedTargetPosition = 100 - value.value;
+        const payload = {
+          commandType: 'command',
+          command: 'setPosition',
+          parameter: `0,ff,${adjustedTargetPosition}`,
+        } as any;
 
-      this.platform.log.info(
-        'Sending request for',
-        this.accessory.displayName,
-        'to SwitchBot API. command:',
-        payload.command,
-        'parameter:',
-        payload.parameter,
-        'commandType:',
-        payload.commandType,
-      );
-      this.platform.log.debug('Curtain %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
+        this.platform.log.info(
+          'Sending request for',
+          this.accessory.displayName,
+          'to SwitchBot API. command:',
+          payload.command,
+          'parameter:',
+          payload.parameter,
+          'commandType:',
+          payload.commandType,
+        );
+        this.platform.log.debug('Curtain %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
 
-      // Make the API request
-      const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
-      this.platform.log.debug('Curtain %s Changes pushed -', this.accessory.displayName, push.data);
+        // Make the API request
+        const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
+        this.platform.log.debug('Curtain %s Changes pushed -', this.accessory.displayName, push.data);
+      }
+    } catch (e) {
+      this.platform.log.error(JSON.stringify(e.message));
+      this.platform.log.debug('Curtain %s -', this.accessory.displayName, JSON.stringify(e));
+      this.apiError(e);
     }
-  }
-
-  private set_maxCurrentOption() {
-    return this.platform.config.options?.curtain?.set_max || 100;
+    this.curtainUpdateInProgress = false;
+    callback();
   }
 
   updateHomeKitCharacteristics() {
@@ -260,22 +229,15 @@ export class Curtain {
         TargetPosition: this.TargetPosition,
       }),
     );
+    this.setMinMax();
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, this.CurrentPosition);
     this.service.updateCharacteristic(this.platform.Characteristic.PositionState, this.PositionState);
     this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, this.TargetPosition);
   }
 
   /**
-   * Handle requests to get the current value of the "Current Position" characteristic
+   * Handle requests to set the value of the "Target Position" characteristic
    */
-  handleCurrentPositionGet(callback) {
-    this.platform.log.debug('Curtain %s - Getting CurrentPosition', this.accessory.displayName);
-
-    // set this to a valid value for CurrentPosition
-    const currentValue = this.CurrentPosition;
-    callback(null, currentValue);
-  }
-
   handleTargetPositionSet(value, callback) {
     this.platform.log.debug('Curtain %s - Set TargetPosition: %s', this.accessory.displayName, value);
 
@@ -285,12 +247,15 @@ export class Curtain {
     if (value > this.CurrentPosition) {
       this.PositionState = this.platform.Characteristic.PositionState.INCREASING;
       this.setNewTarget = true;
+      this.setMinMax();
     } else if (value < this.CurrentPosition) {
       this.PositionState = this.platform.Characteristic.PositionState.DECREASING;
       this.setNewTarget = true;
+      this.setMinMax();
     } else {
       this.PositionState = this.platform.Characteristic.PositionState.STOPPED;
       this.setNewTarget = false;
+      this.setMinMax();
     }
     this.service.setCharacteristic(this.platform.Characteristic.PositionState, this.PositionState);
 
@@ -312,7 +277,26 @@ export class Curtain {
       }, 10000);
     }
 
-    this.doCurtainUpdate.next();
+    this.doCurtainUpdate.push({ id: 'curtain', value: value });
     callback(null);
+  }
+
+  public setMinMax() {
+    if (this.platform.config.options?.curtain?.set_min) {
+      if (this.CurrentPosition <= this.platform.config.options?.curtain?.set_min) {
+        this.CurrentPosition = 0;
+      }
+    }
+    if (this.platform.config.options?.curtain?.set_max) {
+      if (this.CurrentPosition >= this.platform.config.options?.curtain?.set_max) {
+        this.CurrentPosition = 100;
+      }
+    }
+  }
+
+  public apiError(e: any) {
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.PositionState, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, e);
   }
 }

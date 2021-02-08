@@ -13,12 +13,14 @@ export type credentials = {
 
 export type options = {
   refreshRate?: number;
+  pushRate?: number;
   hide_device: string[];
   bot?: bot;
   meter?: meter;
   humidifier?: humidifier;
   curtain?: curtain;
   fan?: irfan;
+  irair?: irair;
 };
 
 export type meter = {
@@ -33,6 +35,7 @@ export type bot = {
 
 export type humidifier = {
   hide_temperature?: boolean;
+  set_minStep?: number;
 };
 
 export type curtain = {
@@ -44,23 +47,31 @@ export type curtain = {
 export type irfan = {
   swing_mode?: string[];
   rotation_speed?: string[];
-  set_max?: set_max;
-  set_min?: set_min;
-  set_minStep?: set_minStep;
+  set_minStep?: number; //set_minStep
+  set_max?: number; //set_max
+  set_min?: number; //set_min
 };
+
+//For Potential Future Use
+export type set_minStep = {
+  set_minStep_device?: string[]; 
+  set_minStep?: number;
+};
+
+//For Potential Future Use
 export type set_max = {
-  set_max_device?: string[]; //For Potential Future Use
+  set_max_device?: string[]; 
   set_max?: number;
 };
 
+//For Potential Future Use
 export type set_min = {
-  set_min_device?: string[]; //For Potential Future Use
+  set_min_device?: string[]; 
   set_min?: number;
 };
 
-export type set_minStep = {
-  set_minStep_device?: string[]; //For Potential Future Use
-  set_minStep?: number;
+export type irair = {
+  hide_automode?: boolean;
 };
 
 export interface AxiosRequestConfig {

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/)
 
+## [Version 2.2.0](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v2.1.0...v2.2.0) (2021-02-08)
+
+### Changes
+
+- Added `pushRate` to set the amount of time inbetween pushes to API.
+  - This sets how many seconds to wait before pushing to API.
+  - Currently only for Curtains.
+- Added Error Handling, shows device as unresponsive if there is an API issues.
+- Added option to Set `minStep` for SwitchBot Humidifiers.
+- Added option to disable Auto Mode on IR Air Conditioners.
+- Fix Issue with Curtain set_min and set_max config options not working.
+- Removed Issue were Curtain was logging that it needed to be recalibrated.
+
 ## [Version 2.1.0](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v2.0.0...v2.1.0) (2021-01-20)
 
 ### Changes

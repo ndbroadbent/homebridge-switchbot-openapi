@@ -78,8 +78,14 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
+    //accessory.context.timeout = this.apiError(accessory);
+
     // add the restored accessory to the accessories cache so we can track if it has already been registered
     this.accessories.push(accessory);
+  }
+
+  apiError(accessory: PlatformAccessory) {
+    this.log.debug('API Error:', accessory.displayName);
   }
 
   /**
@@ -112,6 +118,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // Humidifier Config Options
       if (this.config.options?.humidifier) {
+        this.config.options.humidifier.set_minStep;
         this.config.options.humidifier.hide_temperature;
       }
 
@@ -122,22 +129,18 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.config.options.curtain.set_max;
       }
 
-      // Curtain Config Options
+      // Fan Config Options
       if (this.config.options?.fan) {
         this.config.options.fan.swing_mode;
         this.config.options.fan.rotation_speed;
-        if (this.config.options.fan.set_minStep) {
-          this.config.options.fan.set_minStep.set_minStep_device; //For Potential Future Use
-          this.config.options.fan.set_minStep.set_minStep;
-        }
-        if (this.config.options.fan.set_min) {
-          this.config.options.fan.set_min.set_min_device; //For Potential Future Use
-          this.config.options.fan.set_min.set_min;
-        }
-        if (this.config.options.fan.set_max) {
-          this.config.options.fan.set_max.set_max_device; //For Potential Future Use
-          this.config.options.fan.set_max.set_max;
-        }
+        this.config.options.fan.set_minStep;
+        this.config.options.fan.set_min;
+        this.config.options.fan.set_max;
+      }
+
+      // AirConditioner Config Options
+      if (this.config.options?.irair) {
+        this.config.options.irair.hide_automode;
       }
 
       if (this.config.options!.refreshRate! < 120) {
@@ -147,6 +150,11 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
       if (!this.config.options.refreshRate) {
         this.config.options!.refreshRate! = 300;
         this.log.warn('Using Default Refresh Rate.');
+      }
+
+      if (!this.config.options.pushRate) {
+        this.config.options!.pushRate! = 1;
+        this.log.warn('Using Default Push Rate.');
       }
     }
 
