@@ -2,8 +2,7 @@ import { Service, PlatformAccessory, CharacteristicEventTypes } from 'homebridge
 import { SwitchBotPlatform } from '../platform';
 import { interval, Subject } from 'rxjs';
 import { debounceTime, skipWhile, tap } from 'rxjs/operators';
-import { DeviceURL } from '../settings';
-import { device, deviceStatusResponse } from '../configTypes';
+import { DeviceURL, device, deviceStatusResponse } from '../settings';
 
 /**
  * Platform Accessory
@@ -100,9 +99,6 @@ export class Humidifier {
       })
       .on(CharacteristicEventTypes.SET, this.handleRelativeHumidityHumidifierThresholdSet.bind(this));
 
-    this.service
-      .setCharacteristic(this.platform.Characteristic.LockPhysicalControls, 0);
-
     // create a new Temperature Sensor service
     (this.temperatureservice =
       this.accessory.getService(this.platform.Service.TemperatureSensor) ||
@@ -126,7 +122,7 @@ export class Humidifier {
         tap(() => {
           this.humidifierUpdateInProgress = true;
         }),
-        debounceTime(100),
+        debounceTime(this.platform.config.options!.pushRate! * 1000),
       )
       .subscribe(async () => {
         try {

@@ -1,9 +1,8 @@
 import { Service, PlatformAccessory, CharacteristicEventTypes, CharacteristicSetCallback } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
 import { interval, Subject } from 'rxjs';
-import { debounceTime, skipWhile, tap } from 'rxjs/operators';
-import { DeviceURL } from '../settings';
-import { device } from '../configTypes';
+import { skipWhile } from 'rxjs/operators';
+import { DeviceURL, device } from '../settings';
 
 /**
  * Platform Accessory
@@ -49,13 +48,13 @@ export class Bot {
     // you can create multiple services for each accessory
     if (this.platform.config.options?.bot?.switch) {
       (this.service =
-      this.accessory.getService(this.platform.Service.Switch) ||
-      this.accessory.addService(this.platform.Service.Switch)),
+        this.accessory.getService(this.platform.Service.Switch) ||
+        this.accessory.addService(this.platform.Service.Switch)),
       `${this.device.deviceName} ${this.device.deviceType}`;
     } else {
       (this.service =
-      this.accessory.getService(this.platform.Service.Outlet) ||
-      this.accessory.addService(this.platform.Service.Outlet)),
+        this.accessory.getService(this.platform.Service.Outlet) ||
+        this.accessory.addService(this.platform.Service.Outlet)),
       `${this.device.deviceName} ${this.device.deviceType}`;
     }
 
@@ -85,26 +84,6 @@ export class Bot {
       .pipe(skipWhile(() => this.botUpdateInProgress))
       .subscribe(() => {
         this.refreshStatus();
-      });
-
-    // Watch for Bot change events
-    // We put in a debounce of 100ms so we don't make duplicate calls
-    this.doBotUpdate
-      .pipe(
-        tap(() => {
-          this.botUpdateInProgress = true;
-        }),
-        debounceTime(100),
-      )
-      .subscribe(async () => {
-        try {
-          await this.pushChanges();
-        } catch (e) {
-          this.platform.log.error(JSON.stringify(e.message));
-          this.platform.log.debug('Bot %s -', this.accessory.displayName, JSON.stringify(e));
-          this.apiError(e);
-        }
-        this.botUpdateInProgress = false;
       });
   }
 
@@ -163,43 +142,51 @@ export class Bot {
    * Bot   -    "command"     "press"     "default"	  =        trigger press
    */
   async pushChanges() {
-    const payload = {
-      commandType: 'command',
-      parameter: 'default',
-    } as any;
+    try {
+      this.botUpdateInProgress = true;
+      const payload = {
+        commandType: 'command',
+        parameter: 'default',
+      } as any;
 
-    if (this.platform.config.options?.bot?.device_switch?.includes(this.device.deviceId) && this.On) {
-      payload.command = 'turnOn';
-      this.On = true;
-      this.platform.log.debug('Switch Mode, Turning %s', this.On);
-    } else if (this.platform.config.options?.bot?.device_switch?.includes(this.device.deviceId) && !this.On) {
-      payload.command = 'turnOff';
-      this.On = false;
-      this.platform.log.debug('Switch Mode, Turning %s', this.On);
-    } else if (this.platform.config.options?.bot?.device_press?.includes(this.device.deviceId)) {
-      payload.command = 'press';
-      this.platform.log.debug('Press Mode');
-      this.On = false;
-    } else {
-      throw new Error('Bot Device Paramters not set for this Bot.');
+      if (this.platform.config.options?.bot?.device_switch?.includes(this.device.deviceId) && this.On) {
+        payload.command = 'turnOn';
+        this.On = true;
+        this.platform.log.debug('Switch Mode, Turning %s', this.On);
+      } else if (this.platform.config.options?.bot?.device_switch?.includes(this.device.deviceId) && !this.On) {
+        payload.command = 'turnOff';
+        this.On = false;
+        this.platform.log.debug('Switch Mode, Turning %s', this.On);
+      } else if (this.platform.config.options?.bot?.device_press?.includes(this.device.deviceId)) {
+        payload.command = 'press';
+        this.platform.log.debug('Press Mode');
+        this.On = false;
+      } else {
+        throw new Error('Bot Device Paramters not set for this Bot.');
+      }
+
+      this.platform.log.info(
+        'Sending request for',
+        this.accessory.displayName,
+        'to SwitchBot API. command:',
+        payload.command,
+        'parameter:',
+        payload.parameter,
+        'commandType:',
+        payload.commandType,
+      );
+      this.platform.log.debug('Bot %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
+
+      // Make the API request
+      const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
+      this.platform.log.debug('Bot %s Changes pushed -', this.accessory.displayName, push.data);
+      this.refreshStatus();
+    } catch (e) {
+      this.platform.log.error(JSON.stringify(e.message));
+      this.platform.log.debug('Curtain %s -', this.accessory.displayName, JSON.stringify(e));
+      this.apiError(e);
     }
-
-    this.platform.log.info(
-      'Sending request for',
-      this.accessory.displayName,
-      'to SwitchBot API. command:',
-      payload.command,
-      'parameter:',
-      payload.parameter,
-      'commandType:',
-      payload.commandType,
-    );
-    this.platform.log.debug('Bot %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
-
-    // Make the API request
-    const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
-    this.platform.log.debug('Bot %s Changes pushed -', this.accessory.displayName, push.data);
-    this.refreshStatus();
+    this.botUpdateInProgress = false;
   }
 
   /**

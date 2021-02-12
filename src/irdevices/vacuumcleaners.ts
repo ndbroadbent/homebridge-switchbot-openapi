@@ -6,24 +6,25 @@ import {
   Service,
 } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
-import { DeviceURL } from '../settings';
-import { irdevice } from '../configTypes';
+import { DeviceURL, irdevice } from '../settings';
 
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class WaterHeater {
+export class VacuumCleaner {
   service!: Service;
 
-  Active!: CharacteristicValue;
+  On!: CharacteristicValue;
+  Brightness!: number;
 
   constructor(
     private readonly platform: SwitchBotPlatform,
     private accessory: PlatformAccessory,
     public device: irdevice,
   ) {
+    this.Brightness = 0;
     // set accessory information
     this.accessory
       .getService(this.platform.Service.AccessoryInformation)!
@@ -34,8 +35,8 @@ export class WaterHeater {
     // get the Television service if it exists, otherwise create a new Television service
     // you can create multiple services for each accessory
     (this.service =
-      this.accessory.getService(this.platform.Service.Valve) ||
-      this.accessory.addService(this.platform.Service.Valve)),
+      this.accessory.getService(this.platform.Service.Switch) ||
+      this.accessory.addService(this.platform.Service.Switch)),
     `${this.device.deviceName} ${this.device.remoteType}`;
 
     // To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
@@ -49,26 +50,17 @@ export class WaterHeater {
       `${this.device.deviceName} ${this.device.remoteType}`,
     );
 
-    // set sleep discovery characteristic
-    this.service.setCharacteristic(
-      this.platform.Characteristic.ValveType,
-      this.platform.Characteristic.ValveType.GENERIC_VALVE,
-    );
-
-    // handle on / off events using the Active characteristic
+    // handle on / off events using the On characteristic
     this.service
-      .getCharacteristic(this.platform.Characteristic.Active)
+      .getCharacteristic(this.platform.Characteristic.On)
       .on(CharacteristicEventTypes.SET, (value: any, callback: CharacteristicGetCallback) => {
-        this.platform.log.debug('WaterHeater %s Set Active: %s', this.accessory.displayName, value);
-        if (value === this.platform.Characteristic.Active.INACTIVE) {
-          this.pushWaterHeaterOffChanges();
-          this.service.setCharacteristic(this.platform.Characteristic.InUse, this.platform.Characteristic.InUse.NOT_IN_USE);
+        this.platform.log.debug('%s %s Set On: %s', this.device.remoteType, this.accessory.displayName, value);
+        this.On = value;
+        if (this.On) {
+          this.pushOnChanges();
         } else {
-          this.pushWaterHeaterOnChanges();
-          this.service.setCharacteristic(this.platform.Characteristic.InUse, this.platform.Characteristic.InUse.IN_USE);
+          this.pushOffChanges();
         }
-        this.Active = value;
-        this.service.updateCharacteristic(this.platform.Characteristic.Active, this.Active);
         callback(null);
       });
   }
@@ -76,15 +68,15 @@ export class WaterHeater {
   /**
    * Pushes the requested changes to the SwitchBot API
    * deviceType	commandType     Command	          command parameter	         Description
-   * WaterHeater:        "command"       "turnOff"         "default"	        =        set to OFF state
-   * WaterHeater:        "command"       "turnOn"          "default"	        =        set to ON state
-   * WaterHeater:        "command"       "volumeAdd"       "default"	        =        volume up
-   * WaterHeater:        "command"       "volumeSub"       "default"	        =        volume down
-   * WaterHeater:        "command"       "channelAdd"      "default"	        =        next channel
-   * WaterHeater:        "command"       "channelSub"      "default"	        =        previous channel
+   * Light:        "command"       "turnOff"         "default"	        =        set to OFF state
+   * Light:        "command"       "turnOn"          "default"	        =        set to ON state
+   * Light:        "command"       "volumeAdd"       "default"	        =        volume up
+   * Light:        "command"       "volumeSub"       "default"	        =        volume down
+   * Light:        "command"       "channelAdd"      "default"	        =        next channel
+   * Light:        "command"       "channelSub"      "default"	        =        previous channel
    */
-  async pushWaterHeaterOnChanges() {
-    if (this.Active !== 1) {
+  async pushOnChanges() {
+    if (this.On) {
       const payload = {
         commandType: 'command',
         parameter: 'default',
@@ -94,8 +86,8 @@ export class WaterHeater {
     }
   }
 
-  async pushWaterHeaterOffChanges() {
-    if (this.Active !== 0) {
+  async pushOffChanges() {
+    if (!this.On) {
       const payload = {
         commandType: 'command',
         parameter: 'default',
@@ -117,19 +109,17 @@ export class WaterHeater {
         'commandType:',
         payload.commandType,
       );
-      this.platform.log.debug('WaterHeater %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
+      this.platform.log.debug('Light %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
 
       // Make the API request
       const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
-      this.platform.log.debug('WaterHeater %s Changes pushed -', this.accessory.displayName, push.data);
+      this.platform.log.debug('Light %s Changes pushed -', this.accessory.displayName, push.data);
     } catch (e) {
       this.apiError(e);
     }
   }
 
   public apiError(e: any) {
-    this.service.updateCharacteristic(this.platform.Characteristic.ValveType, e);
-    this.service.updateCharacteristic(this.platform.Characteristic.Active, e);
-    this.service.updateCharacteristic(this.platform.Characteristic.InUse, e);
+    this.service.updateCharacteristic(this.platform.Characteristic.On, e);
   }
 }

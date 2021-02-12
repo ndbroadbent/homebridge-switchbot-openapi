@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/)
 
+## [Version 3.0.0](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v2.4.0...v3.0.0) (2021-02-12)
+
+### Changes
+
+- Added `pushRate` to set the amount of time inbetween pushes to API.
+  - Works on Curtains and Humidifers Devices.
+  - If set higher, changes take longer, prevents excessive pushes to API.
+- Housekeeping and Update Dependencies.  
+
 ## [Version 2.4.0](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v2.3.0...v2.4.0) (2021-02-09)
 
 ### Changes

@@ -7,8 +7,7 @@ import {
   Service,
 } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
-import { DeviceURL } from '../settings';
-import { irdevice, deviceStatusResponse } from '../configTypes';
+import { DeviceURL, irdevice, deviceStatusResponse} from '../settings';
 
 /**
  * Platform Accessory

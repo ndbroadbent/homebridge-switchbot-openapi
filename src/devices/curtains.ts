@@ -1,10 +1,8 @@
 import { Service, PlatformAccessory, CharacteristicEventTypes } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
-import { interval } from 'rxjs';
-import { skipWhile } from 'rxjs/operators';
-import { DeviceURL } from '../settings';
-import { device, deviceStatusResponse } from '../configTypes';
-import Queue = require('better-queue');
+import { interval, Subject } from 'rxjs';
+import { debounceTime, skipWhile, tap } from 'rxjs/operators';
+import { DeviceURL, device, deviceStatusResponse } from '../settings';
 
 export class Curtain {
   private service: Service;
@@ -17,8 +15,7 @@ export class Curtain {
   setNewTargetTimer!: NodeJS.Timeout;
 
   curtainUpdateInProgress!: boolean;
-  doCurtainUpdate: Queue;
-
+  doCurtainUpdate!: any;
 
   constructor(
     private readonly platform: SwitchBotPlatform,
@@ -32,9 +29,7 @@ export class Curtain {
     this.PositionState = this.platform.Characteristic.PositionState.STOPPED;
 
     // this is subject we use to track when we need to POST changes to the SwitchBot API
-    this.doCurtainUpdate = new Queue(this.pushChanges.bind(this), {
-      afterProcessDelay: (this.platform.config.options!.pushRate! * 1000), 
-    });
+    this.doCurtainUpdate = new Subject();
     this.curtainUpdateInProgress = false;
     this.setNewTarget = false;
 
@@ -101,6 +96,26 @@ export class Curtain {
         }
         this.platform.log.debug('Refresh status when moving', this.PositionState);
         this.refreshStatus();
+      });
+
+    // Watch for Curtain change events
+    // We put in a debounce of 100ms so we don't make duplicate calls
+    this.doCurtainUpdate
+      .pipe(
+        tap(() => {
+          this.curtainUpdateInProgress = true;
+        }),
+        debounceTime(this.platform.config.options!.pushRate! * 1000),
+      )
+      .subscribe(async () => {
+        try {
+          await this.pushChanges();
+        } catch (e) {
+          this.platform.log.error(JSON.stringify(e.message));
+          this.platform.log.debug('Curtain %s -', this.accessory.displayName, JSON.stringify(e));
+          this.apiError(e);
+        }
+        this.curtainUpdateInProgress = false;
       });
   }
 
@@ -182,41 +197,32 @@ export class Curtain {
     }
   }
 
-  async pushChanges(value, callback) {
-    try {
-      this.curtainUpdateInProgress = true;
-      if (value.value !== this.CurrentPosition) {
-        this.platform.log.debug(`Pushing ${value.value}`);
-        const adjustedTargetPosition = 100 - value.value;
-        const payload = {
-          commandType: 'command',
-          command: 'setPosition',
-          parameter: `0,ff,${adjustedTargetPosition}`,
-        } as any;
+  async pushChanges() {
+    if (this.TargetPosition !== this.CurrentPosition) {
+      this.platform.log.debug(`Pushing ${this.TargetPosition}`);
+      const adjustedTargetPosition = 100 - this.TargetPosition;
+      const payload = {
+        commandType: 'command',
+        command: 'setPosition',
+        parameter: `0,ff,${adjustedTargetPosition}`,
+      } as any;
 
-        this.platform.log.info(
-          'Sending request for',
-          this.accessory.displayName,
-          'to SwitchBot API. command:',
-          payload.command,
-          'parameter:',
-          payload.parameter,
-          'commandType:',
-          payload.commandType,
-        );
-        this.platform.log.debug('Curtain %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
+      this.platform.log.info(
+        'Sending request for',
+        this.accessory.displayName,
+        'to SwitchBot API. command:',
+        payload.command,
+        'parameter:',
+        payload.parameter,
+        'commandType:',
+        payload.commandType,
+      );
+      this.platform.log.debug('Curtain %s pushChanges -', this.accessory.displayName, JSON.stringify(payload));
 
-        // Make the API request
-        const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
-        this.platform.log.debug('Curtain %s Changes pushed -', this.accessory.displayName, push.data);
-      }
-    } catch (e) {
-      this.platform.log.error(JSON.stringify(e.message));
-      this.platform.log.debug('Curtain %s -', this.accessory.displayName, JSON.stringify(e));
-      this.apiError(e);
+      // Make the API request
+      const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
+      this.platform.log.debug('Curtain %s Changes pushed -', this.accessory.displayName, push.data);
     }
-    this.curtainUpdateInProgress = false;
-    callback();
   }
 
   updateHomeKitCharacteristics() {

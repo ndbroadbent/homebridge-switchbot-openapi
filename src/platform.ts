@@ -1,19 +1,27 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, Service, Characteristic } from 'homebridge';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { PLATFORM_NAME, PLUGIN_NAME, DeviceURL } from './settings';
-import { Humidifier } from './Devices/Humidifier';
-import { Bot } from './Devices/Bot';
-import { Meter } from './Devices/Meter';
-import { Curtain } from './Devices/Curtain';
-import { TV } from './irDevices/TV';
-import { irdevice, device, SwitchBotPlatformConfig, deviceResponses, deviceStatusResponse } from './configTypes';
-import { Fan } from './irDevices/Fan';
-import { WaterHeater } from './irDevices/WaterHeater';
-import { Light } from './irDevices/Light';
-import { Camera } from './irDevices/Camera';
-import { VacuumCleaner } from './irDevices/VacuumCleaner';
-import { AirConditioner } from './irDevices/AirConditioner';
-import { AirPurifier } from './irDevices/AirPurifier';
+import {
+  PLATFORM_NAME,
+  PLUGIN_NAME,
+  DeviceURL,
+  irdevice,
+  device,
+  SwitchBotPlatformConfig,
+  deviceResponses,
+  deviceStatusResponse,
+} from './settings';
+import { Humidifier } from './devices/humidifiers';
+import { Bot } from './devices/bots';
+import { Meter } from './devices/meters';
+import { Curtain } from './devices/curtains';
+import { TV } from './irdevices/tvs';
+import { Fan } from './irdevices/fans';
+import { WaterHeater } from './irdevices/waterheaters';
+import { Light } from './irdevices/lights';
+import { Camera } from './irdevices/cameras';
+import { VacuumCleaner } from './irdevices/vacuumcleaners';
+import { AirConditioner } from './irdevices/airconditioners';
+import { AirPurifier } from './irdevices/airpurifiers';
 
 /**
  * HomebridgePlatform
@@ -149,12 +157,14 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
       }
 
       if (!this.config.options.refreshRate) {
+        // default 300 seconds
         this.config.options!.refreshRate! = 300;
         this.log.warn('Using Default Refresh Rate.');
       }
 
       if (!this.config.options.pushRate) {
-        this.config.options!.pushRate! = 1;
+        // default 100 milliseconds
+        this.config.options!.pushRate! = 0.1;
         this.log.warn('Using Default Push Rate.');
       }
     }
@@ -282,14 +292,14 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
               this.log.info('Discovered %s %s', device.deviceName, device.remoteType);
             }
             this.createLight(device);
-            break;  
+            break;
           case 'Air Purifier':
           case 'DIY Air Purifier':
             if (this.config.devicediscovery) {
               this.log.info('Discovered %s %s', device.deviceName, device.remoteType);
             }
             this.createAirPurifier(device);
-            break;  
+            break;
           case 'Water Heater':
           case 'DIY Water Heater':
             if (this.config.devicediscovery) {
@@ -303,14 +313,14 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
               this.log.info('Discovered %s %s', device.deviceName, device.remoteType);
             }
             this.createVacuumCleaner(device);
-            break; 
+            break;
           case 'Camera':
           case 'DIY Camera':
             if (this.config.devicediscovery) {
               this.log.info('Discovered %s %s', device.deviceName, device.remoteType);
             }
             this.createCamera(device);
-            break;     
+            break;
           default:
             this.log.info(
               'Device: %s with Device Type: %s, is currently not supported.',
@@ -533,12 +543,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
       // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.deviceType, device.deviceId);
 
-
       if (device.group) {
-        this.log.warn('Your Curtains are Grouped, you must hide your secondary curtian using the Hidden Device Setting');
-      }
-      if (!device.calibrate) {
-        this.log.warn('Your Curtains are not Calibrated, Please Recalibrate');
+        this.log.warn(
+          'Your Curtains are Grouped, you must hide your secondary curtian using the Hidden Device Setting',
+        );
       }
 
       // create a new accessory
@@ -591,7 +599,9 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
       // create the accessory handler for the restored accessory
       // this is imported from `platformAccessory.ts`
       new TV(this, existingAccessory, device);
-      this.log.debug(`${device.remoteType} UDID: ${device.deviceName}-${device.deviceId}-${device.remoteType}-${device.hubDeviceId}`);
+      this.log.debug(
+        `${device.remoteType} UDID: ${device.deviceName}-${device.deviceId}-${device.remoteType}-${device.hubDeviceId}`,
+      );
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
       // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
@@ -607,7 +617,9 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
       new TV(this, accessory, device);
-      this.log.debug(`${device.remoteType} UDID: ${device.deviceName}-${device.deviceId}-${device.remoteType}-${device.hubDeviceId}`);
+      this.log.debug(
+        `${device.remoteType} UDID: ${device.deviceName}-${device.deviceId}-${device.remoteType}-${device.hubDeviceId}`,
+      );
 
       /**
        * Publish as external accessory

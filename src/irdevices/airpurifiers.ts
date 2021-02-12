@@ -6,8 +6,7 @@ import {
   Service,
 } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
-import { DeviceURL } from '../settings';
-import { irdevice } from '../configTypes';
+import { DeviceURL, irdevice } from '../settings';
 
 /**
  * Platform Accessory
@@ -28,7 +27,6 @@ export class AirPurifier {
   static PURIFYING_AIR: number;
   static IDLE: number;
   static INACTIVE: number;
-
 
   constructor(
     private readonly platform: SwitchBotPlatform,
@@ -79,20 +77,21 @@ export class AirPurifier {
         }
       });
 
-    this.service.getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
+    this.service
+      .getCharacteristic(this.platform.Characteristic.CurrentAirPurifierState)
       .on(CharacteristicEventTypes.GET, this.getCurrentAirPurifierState.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
-      .on(CharacteristicEventTypes.SET, this.setCurrentAirPurifierState.bind(this));  
-  
+    this.service
+      .getCharacteristic(this.platform.Characteristic.TargetAirPurifierState)
+      .on(CharacteristicEventTypes.SET, this.setCurrentAirPurifierState.bind(this));
   }
 
   setCurrentAirPurifierState(state, callback: CharacteristicGetCallback) {
-    switch(state){
+    switch (state) {
       case this.platform.Characteristic.CurrentAirPurifierState.PURIFYING_AIR:
         this.currentMode = AirPurifier.PURIFYING_AIR;
         break;
-      case this.platform.Characteristic.CurrentAirPurifierState.IDLE:  
+      case this.platform.Characteristic.CurrentAirPurifierState.IDLE:
         this.currentMode = AirPurifier.IDLE;
         break;
       case this.platform.Characteristic.CurrentAirPurifierState.INACTIVE:
@@ -114,16 +113,16 @@ export class AirPurifier {
   }
 
   /**
-	 * Pushes the requested changes to the SwitchBot API
-	 * deviceType				commandType     Command	          command parameter	         Description
-	 * AirPurifier:        "command"       "turnOn"         "default"	        =        every home appliance can be turned on by default
-	 * AirPurifier:        "command"       "turnOff"        "default"	        =        every home appliance can be turned off by default
+   * Pushes the requested changes to the SwitchBot API
+   * deviceType				commandType     Command	          command parameter	         Description
+   * AirPurifier:        "command"       "turnOn"         "default"	        =        every home appliance can be turned on by default
+   * AirPurifier:        "command"       "turnOff"        "default"	        =        every home appliance can be turned off by default
    * AirPurifier:        "command"       "swing"          "default"	        =        swing
-	 * AirPurifier:        "command"       "timer"          "default"	        =        timer
-	 * AirPurifier:        "command"       "lowSpeed"       "default"	        =        fan speed to low
-	 * AirPurifier:        "command"       "middleSpeed"    "default"	        =        fan speed to medium
-	 * AirPurifier:        "command"       "highSpeed"      "default"	        =        fan speed to high
-	 */
+   * AirPurifier:        "command"       "timer"          "default"	        =        timer
+   * AirPurifier:        "command"       "lowSpeed"       "default"	        =        fan speed to low
+   * AirPurifier:        "command"       "middleSpeed"    "default"	        =        fan speed to medium
+   * AirPurifier:        "command"       "highSpeed"      "default"	        =        fan speed to high
+   */
   async pushAirConditionerOnChanges() {
     if (this.Active !== 1) {
       const payload = {
@@ -149,8 +148,10 @@ export class AirPurifier {
   async pushAirConditionerStatusChanges() {
     if (!this.busy) {
       this.busy = true;
-      this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState,
-        this.platform.Characteristic.CurrentHeaterCoolerState.IDLE);
+      this.service.updateCharacteristic(
+        this.platform.Characteristic.CurrentHeaterCoolerState,
+        this.platform.Characteristic.CurrentHeaterCoolerState.IDLE,
+      );
     }
     clearTimeout(this.timeout);
 
@@ -161,21 +162,29 @@ export class AirPurifier {
   async pushAirConditionerDetailsChanges() {
     const payload = {
       commandType: 'command',
-      parameter: `${this.currentTemperature || 24},${this.currentMode || 1},${this.currentFanSpeed || 1},${this.Active === 1 ? 'on':'off'}`,
+      parameter: `${this.currentTemperature || 24},${this.currentMode || 1},${this.currentFanSpeed || 1},${
+        this.Active === 1 ? 'on' : 'off'
+      }`,
       command: 'setAll',
     } as any;
 
     if (this.Active === 1) {
       if ((this.currentTemperature || 24) < (this.lastTemperature || 30)) {
-        this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState,
-          this.platform.Characteristic.CurrentHeaterCoolerState.COOLING);
+        this.service.updateCharacteristic(
+          this.platform.Characteristic.CurrentHeaterCoolerState,
+          this.platform.Characteristic.CurrentHeaterCoolerState.COOLING,
+        );
       } else {
-        this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState,
-          this.platform.Characteristic.CurrentHeaterCoolerState.HEATING);
+        this.service.updateCharacteristic(
+          this.platform.Characteristic.CurrentHeaterCoolerState,
+          this.platform.Characteristic.CurrentHeaterCoolerState.HEATING,
+        );
       }
     } else {
-      this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState,
-        this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE);
+      this.service.updateCharacteristic(
+        this.platform.Characteristic.CurrentHeaterCoolerState,
+        this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE,
+      );
     }
 
     await this.pushChanges(payload);
@@ -193,7 +202,12 @@ export class AirPurifier {
         'commandType:',
         payload.commandType,
       );
-      this.platform.log.debug('%s %s pushChanges -', this.device.remoteType, this.accessory.displayName, JSON.stringify(payload));
+      this.platform.log.debug(
+        '%s %s pushChanges -',
+        this.device.remoteType,
+        this.accessory.displayName,
+        JSON.stringify(payload),
+      );
 
       // Make the API request
       const push = await this.platform.axios.post(`${DeviceURL}/${this.device.deviceId}/commands`, payload);
@@ -202,7 +216,7 @@ export class AirPurifier {
       this.apiError(e);
     }
   }
-  
+
   public apiError(e: any) {
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState, e);
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentAirPurifierState, e);
