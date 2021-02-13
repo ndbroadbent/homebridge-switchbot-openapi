@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/)
 
+## [Version 3.0.1](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v3.0.0...v3.0.1) (2021-02-12)
+
+### Changes
+
+- Fixes issue with curtain not pushing update to API.
+
 ## [Version 3.0.0](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v2.4.0...v3.0.0) (2021-02-12)
 
 ### Changes

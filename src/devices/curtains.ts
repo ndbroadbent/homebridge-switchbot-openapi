@@ -282,8 +282,7 @@ export class Curtain {
         this.setNewTarget = false;
       }, 10000);
     }
-
-    this.doCurtainUpdate.push({ id: 'curtain', value: value });
+    this.doCurtainUpdate.next();
     callback(null);
   }
 
