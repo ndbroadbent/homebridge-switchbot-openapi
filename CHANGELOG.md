@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/)
 
+## [Version 3.2.0](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v3.1.0...v3.2.0) (2021-02-22)
+
+### Changes
+
+- Add curtain refresh option.
+- Add support and set new requirement for Homebridge v1.3.0.
+- Characteristics are now only updated if defined with a valid `CharacteristicValue`.
+
 ## [Version 3.1.0](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v3.0.1...v3.1.0) (2021-02-16)
 
 ### Changes

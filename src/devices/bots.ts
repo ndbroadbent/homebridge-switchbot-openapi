@@ -1,8 +1,8 @@
-import { Service, PlatformAccessory, CharacteristicEventTypes, CharacteristicSetCallback } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
 import { interval, Subject } from 'rxjs';
 import { debounceTime, skipWhile, tap } from 'rxjs/operators';
-import { DeviceURL, device } from '../settings';
+import { DeviceURL, device, deviceStatusResponse } from '../settings';
 
 /**
  * Platform Accessory
@@ -12,8 +12,8 @@ import { DeviceURL, device } from '../settings';
 export class Bot {
   private service: Service;
 
-  On!: boolean;
-  OutletInUse!: boolean;
+  On!: CharacteristicValue;
+  OutletInUse!: CharacteristicValue;
   deviceStatus!: any;
 
   botUpdateInProgress!: boolean;
@@ -74,7 +74,9 @@ export class Bot {
 
     this.service
       .getCharacteristic(this.platform.Characteristic.On)
-      .on(CharacteristicEventTypes.SET, this.handleOnSet.bind(this));
+      .onSet(async (value: CharacteristicValue) => {
+        this.handleOnSet(value);
+      });
 
     // Retrieve initial values and updateHomekit
     this.updateHomeKitCharacteristics();
@@ -131,7 +133,7 @@ export class Bot {
   async refreshStatus() {
     try {
       // this.platform.log.error('Bot - Reading', `${DeviceURL}/${this.device.deviceID}/devices`);
-      const deviceStatus: any = {
+      const deviceStatus: deviceStatusResponse = {
         statusCode: 100,
         body: {
           deviceId: this.device.deviceId,
@@ -205,21 +207,12 @@ export class Bot {
    * Updates the status for each of the HomeKit Characteristics
    */
   updateHomeKitCharacteristics() {
-    this.service.updateCharacteristic(this.platform.Characteristic.On, this.On);
-    if (!this.platform.config.options?.bot?.switch) {
+    if (this.On !== undefined) {
+      this.service.updateCharacteristic(this.platform.Characteristic.On, this.On);
+    }
+    if (!this.platform.config.options?.bot?.switch && this.OutletInUse !== undefined) {
       this.service.updateCharacteristic(this.platform.Characteristic.OutletInUse, this.OutletInUse);
     }
-  }
-
-  /**
-   * Handle requests to set the "On" characteristic
-   */
-  handleOnSet(value: any, callback: CharacteristicSetCallback) {
-    this.platform.log.debug('Bot %s -', this.accessory.displayName, `Set On: ${value}`);
-    this.doBotUpdate.next();
-    this.On = value;
-    this.service.updateCharacteristic(this.platform.Characteristic.On, this.On);
-    callback(null);
   }
 
   public apiError(e: any) {
@@ -227,5 +220,15 @@ export class Bot {
     if (!this.platform.config.options?.bot?.switch) {
       this.service.updateCharacteristic(this.platform.Characteristic.OutletInUse, e);
     }
+  }
+
+  /**
+   * Handle requests to set the "On" characteristic
+   */
+  private handleOnSet(value: CharacteristicValue) {
+    this.platform.log.debug('Bot %s -', this.accessory.displayName, `Set On: ${value}`);
+    this.doBotUpdate.next();
+    this.On = value;
+    this.service.updateCharacteristic(this.platform.Characteristic.On, this.On);
   }
 }

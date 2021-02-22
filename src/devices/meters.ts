@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicEventTypes, CharacteristicGetCallback, Units } from 'homebridge';
+import { Service, PlatformAccessory, Units, CharacteristicValue } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
 import { interval, Subject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
@@ -14,16 +14,14 @@ export class Meter {
   temperatureservice?: Service;
   humidityservice?: Service;
 
-  CurrentRelativeHumidity!: number;
-  CurrentTemperature!: number;
-  BatteryLevel!: number;
-  ChargingState!: number;
-  StatusLowBattery!: number;
-  Active!: number;
-  WaterLevel!: number;
+  CurrentRelativeHumidity!: CharacteristicValue;
+  CurrentTemperature!: CharacteristicValue;
+  BatteryLevel!: CharacteristicValue;
+  ChargingState!: CharacteristicValue;
+  StatusLowBattery!: CharacteristicValue;
+  Active!: CharacteristicValue;
+  WaterLevel!: CharacteristicValue;
   deviceStatus!: deviceStatusResponse;
-  humidity!: number;
-  TemperatureUnits!: number;
 
   meterUpdateInProgress!: boolean;
   doMeterUpdate!: any;
@@ -34,11 +32,11 @@ export class Meter {
     public device: device,
   ) {
     // default placeholders
-    this.BatteryLevel = 100;
+    this.BatteryLevel = 0;
     this.ChargingState = 2;
     this.StatusLowBattery = this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
-    this.CurrentRelativeHumidity = 100;
-    this.CurrentTemperature = 100;
+    this.CurrentRelativeHumidity = 0;
+    this.CurrentTemperature = 0;
 
     // this is subject we use to track when we need to POST changes to the SwitchBot API
     this.doMeterUpdate = new Subject();
@@ -100,11 +98,14 @@ export class Meter {
         .getCharacteristic(this.platform.Characteristic.CurrentTemperature)
         .setProps({
           unit: Units['CELSIUS'],
-          minValue: -50,
-          maxValue: 212,
+          validValueRanges: [-100, 100],
+          minValue: -100,
+          maxValue: 100,
           minStep: 0.1,
         })
-        .on(CharacteristicEventTypes.GET, this.handleCurrentTemperatureGet.bind(this));
+        .onGet(async () => {
+          return this.CurrentTemperature;
+        });
     } else if (this.temperatureservice && this.platform.config.options?.meter?.hide_temperature) {
       accessory.removeService(this.temperatureservice);
     }
@@ -137,18 +138,18 @@ export class Meter {
     }
     // Current Relative Humidity
     if (!this.platform.config.options?.meter?.hide_humidity) {
-      this.CurrentRelativeHumidity = this.deviceStatus.body.humidity;
+      this.CurrentRelativeHumidity = this.deviceStatus.body.humidity!;
       this.platform.log.debug('Meter %s - Humidity: %s%', this.accessory.displayName, this.CurrentRelativeHumidity);
     }
 
     // Current Temperature
     if (!this.platform.config.options?.meter?.hide_temperature) {
       if (this.platform.config.options?.meter?.unit === 1) {
-        this.CurrentTemperature = this.toFahrenheit(this.deviceStatus.body.temperature);
+        this.CurrentTemperature = this.toFahrenheit(this.deviceStatus.body.temperature!);
       } else if (this.platform.config.options?.meter?.unit === 0) {
-        this.CurrentTemperature = this.toCelsius(this.deviceStatus.body.temperature);
+        this.CurrentTemperature = this.toCelsius(this.deviceStatus.body.temperature!);
       } else {
-        this.CurrentTemperature = this.deviceStatus.body.temperature;
+        this.CurrentTemperature = this.deviceStatus.body.temperature!;
       }
       this.platform.log.debug('Meter %s - Temperature: %s°c', this.accessory.displayName, this.CurrentTemperature);
     }
@@ -188,15 +189,19 @@ export class Meter {
    * Updates the status for each of the HomeKit Characteristics
    */
   updateHomeKitCharacteristics() {
-    this.service.updateCharacteristic(this.platform.Characteristic.StatusLowBattery, this.StatusLowBattery);
-    this.service.updateCharacteristic(this.platform.Characteristic.BatteryLevel, this.BatteryLevel);
-    if (!this.platform.config.options?.meter?.hide_humidity) {
+    if (this.StatusLowBattery !== undefined) {
+      this.service.updateCharacteristic(this.platform.Characteristic.StatusLowBattery, this.StatusLowBattery);
+    }
+    if (this.BatteryLevel !== undefined) {
+      this.service.updateCharacteristic(this.platform.Characteristic.BatteryLevel, this.BatteryLevel);
+    }
+    if (!this.platform.config.options?.meter?.hide_humidity && this.CurrentRelativeHumidity !== undefined) {
       this.humidityservice?.updateCharacteristic(
         this.platform.Characteristic.CurrentRelativeHumidity,
         this.CurrentRelativeHumidity,
       );
     }
-    if (!this.platform.config.options?.meter?.hide_temperature) {
+    if (!this.platform.config.options?.meter?.hide_temperature && this.CurrentTemperature !== undefined) {
       this.temperatureservice?.updateCharacteristic(
         this.platform.Characteristic.CurrentTemperature,
         this.CurrentTemperature,
@@ -212,20 +217,6 @@ export class Meter {
     }
     if (!this.platform.config.options?.meter?.hide_temperature) {
       this.temperatureservice?.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, e);
-    }
-  }
-
-  /**
-   * Handle requests to get the current value of the "Current Temperature" characteristic
-   */
-  handleCurrentTemperatureGet(callback: CharacteristicGetCallback) {
-    if (!this.platform.config.options?.meter?.hide_temperature) {
-      this.platform.log.debug('Meter %s - Get CurrentTemperature', this.accessory.displayName);
-
-      const currentValue = this.CurrentTemperature;
-
-      callback(null, currentValue);
-      this.platform.log.info('Meter %s - CurrentTemperature: %s', this.accessory.displayName, currentValue);
     }
   }
 
