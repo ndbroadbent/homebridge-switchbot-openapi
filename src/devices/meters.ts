@@ -46,28 +46,28 @@ export class Meter {
     this.refreshStatus();
 
     // set accessory information
-    this.accessory
+    accessory
       .getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'SwitchBot')
       .setCharacteristic(this.platform.Characteristic.Model, 'SWITCHBOT-METERTH-S1')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.device.deviceId);
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, device.deviceId);
 
     // get the Battery service if it exists, otherwise create a new Battery service
     // you can create multiple services for each accessory
     (this.service =
-      this.accessory.getService(this.platform.Service.Battery) ||
-      this.accessory.addService(this.platform.Service.Battery)),
-    `${this.device.deviceName} ${this.device.deviceType}`;
+      accessory.getService(this.platform.Service.Battery) ||
+      accessory.addService(this.platform.Service.Battery)),
+    `${device.deviceName} ${device.deviceType}`;
 
     // To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
     // when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-    // this.accessory.getService('NAME') ?? this.accessory.addService(this.platform.Service.Battery, 'NAME', 'USER_DEFINED_SUBTYPE');
+    // accessory.getService('NAME') ?? accessory.addService(this.platform.Service.Battery, 'NAME', 'USER_DEFINED_SUBTYPE');
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     this.service.setCharacteristic(
       this.platform.Characteristic.Name,
-      `${this.device.deviceName} ${this.device.deviceType}`,
+      `${device.deviceName} ${device.deviceType}`,
     );
 
     // each service must implement at-minimum the "required characteristics" for the given service type
@@ -81,7 +81,7 @@ export class Meter {
     if (!this.humidityservice && !this.platform.config.options?.meter?.hide_humidity) {
       this.humidityservice = accessory.addService(
         this.platform.Service.HumiditySensor,
-        `${this.device.deviceName} ${this.device.deviceType} Humidity Sensor`,
+        `${device.deviceName} ${device.deviceType} Humidity Sensor`,
       );
     } else if (this.humidityservice && this.platform.config.options?.meter?.hide_humidity) {
       accessory.removeService(this.humidityservice);
@@ -91,7 +91,7 @@ export class Meter {
     if (!this.temperatureservice && !this.platform.config.options?.meter?.hide_temperature) {
       this.temperatureservice = accessory.addService(
         this.platform.Service.TemperatureSensor,
-        `${this.device.deviceName} ${this.device.deviceType} Temperature Sensor`,
+        `${device.deviceName} ${device.deviceType} Temperature Sensor`,
       );
 
       this.temperatureservice

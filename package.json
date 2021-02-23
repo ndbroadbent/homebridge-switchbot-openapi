@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge SwitchBot OpenAPI",
   "name": "homebridge-switchbot-openapi",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "The [Homebridge](https://homebridge.io) SwitchBot plugin allows you to access your [SwitchBot](https://www.switch-bot.com) device(s) from HomeKit.",
   "author": "SwitchBot <support@wondertechlabs.com> (https://github.com/SwitchBot)",
   "license": "ISC",
@@ -57,7 +57,7 @@
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.5",
+    "typescript": "^4.2.2",
     "typescript-axios-wb": "^1.0.3"
   }
 }

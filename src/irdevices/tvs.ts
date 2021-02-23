@@ -21,49 +21,49 @@ export class TV {
     public device: irdevice,
   ) {
     // set accessory information
-    this.accessory
+    accessory
       .getService(this.platform.Service.AccessoryInformation)!
+      .setCharacteristic(this.platform.Characteristic.Name, `${device.deviceName} ${device.remoteType}`)
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'SwitchBot')
-      .setCharacteristic(this.platform.Characteristic.Model, this.device.remoteType)
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.device.deviceId);
+      .setCharacteristic(this.platform.Characteristic.Model, device.remoteType)
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, device.deviceId);
 
     // set the accessory category
     switch (device.remoteType) {
       case 'Speaker':
       case 'DIY Speaker':
-        this.accessory.category = this.platform.api.hap.Categories.SPEAKER;
+        accessory.category = this.platform.api.hap.Categories.SPEAKER;
         break;
       case 'IPTV':
       case 'DIY IPTV':
-        this.accessory.category = this.platform.api.hap.Categories.TV_STREAMING_STICK;
+        accessory.category = this.platform.api.hap.Categories.TV_STREAMING_STICK;
         break;
       case 'DVD':
       case 'DIY DVD':
       case 'Set Top Box':
       case 'DIY Set Top Box':
-        this.accessory.category = this.platform.api.hap.Categories.TV_SET_TOP_BOX;
+        accessory.category = this.platform.api.hap.Categories.TV_SET_TOP_BOX;
         break;
       default:
-        this.accessory.category = this.platform.api.hap.Categories.TELEVISION;
+        accessory.category = this.platform.api.hap.Categories.TELEVISION;
     }
 
     // get the Television service if it exists, otherwise create a new Television service
     // you can create multiple services for each accessory
     (this.service =
-      this.accessory.getService(this.platform.Service.Television) ||
-      this.accessory.addService(this.platform.Service.Television)),
-    `${this.device.deviceName} ${this.device.remoteType}`;
+      accessory.getService(this.platform.Service.Television) ||
+      accessory.addService(this.platform.Service.Television)),
+    `${device.deviceName} ${device.remoteType}`;
 
     // To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
     // when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-    // this.accessory.getService('NAME') ?? this.accessory.addService(this.platform.Service.Outlet, 'NAME', 'USER_DEFINED_SUBTYPE');
+    // accessory.getService('NAME') ?? accessory.addService(this.platform.Service.Outlet, 'NAME', 'USER_DEFINED_SUBTYPE');
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(
-      this.platform.Characteristic.ConfiguredName,
-      `${this.device.deviceName} ${this.device.remoteType}`,
-    );
+    this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName);
+    
+    //this.service.setCharacteristic(this.platform.Characteristic.Name, `${device.deviceName} ${device.remoteType}`);
 
     // set sleep discovery characteristic
     this.service.setCharacteristic(
@@ -95,9 +95,9 @@ export class TV {
      */
     // create a new Television Speaker service
     (this.speakerService =
-      this.accessory.getService(this.platform.Service.TelevisionSpeaker) ||
-      this.accessory.addService(this.platform.Service.TelevisionSpeaker)),
-    `${this.device.deviceName} ${this.device.remoteType} Speaker`;
+      accessory.getService(this.platform.Service.TelevisionSpeaker) ||
+      accessory.addService(this.platform.Service.TelevisionSpeaker)),
+    `${device.deviceName} ${device.remoteType} Speaker`;
 
     this.speakerService
       .setCharacteristic(this.platform.Characteristic.Active, this.platform.Characteristic.Active.ACTIVE)
