@@ -119,6 +119,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // Bot Config Options
       if (this.config.options?.bot) {
+        this.config.options.bot = this.config.options.bot || {};
         this.config.options.bot.switch;
         this.config.options.bot.device_press;
         this.config.options.bot.device_switch;
@@ -126,32 +127,34 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // Meter Config Options
       if (this.config.options?.meter) {
+        this.config.options.meter = this.config.options.meter || {};
         this.config.options.meter.hide_temperature;
         this.config.options.meter.hide_humidity;
       }
 
       // Humidifier Config Options
       if (this.config.options?.humidifier) {
+        this.config.options.humidifier = this.config.options.humidifier || {};
         this.config.options.humidifier.set_minStep;
         this.config.options.humidifier.hide_temperature;
       }
 
       // Curtain Config Options
       if (this.config.options?.curtain) {
+        this.config.options.curtain = this.config.options.curtain || {};
         this.config.options.curtain.disable_group;
-        this.config.options.curtain.refreshRate;
-        this.config.options.curtain.set_minStep;
-        this.config.options.curtain.set_min;
-        this.config.options.curtain.set_max;
-
         if (!this.config.options.curtain.refreshRate) {
           this.config.options!.curtain!.refreshRate! = 5;
           this.log.debug('Using Default Curtain Refresh Rate.');
         }
+        this.config.options.curtain.set_minStep;
+        this.config.options.curtain.set_min;
+        this.config.options.curtain.set_max;
       }
 
       // Fan Config Options
       if (this.config.options?.fan) {
+        this.config.options.fan = this.config.options.fan || {};
         this.config.options.fan.swing_mode;
         this.config.options.fan.rotation_speed;
         this.config.options.fan.set_minStep;
@@ -161,11 +164,13 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // AirConditioner Config Options
       if (this.config.options?.irair) {
+        this.config.options.irair = this.config.options.irair || {};
         this.config.options.irair.hide_automode;
       }
 
       // Others Config Options
       if (this.config.options?.other) {
+        this.config.options.other = this.config.options.other || {};
         this.config.options.other.deviceType;
         this.config.options.other.commandOn;
         this.config.options.other.commandOff;
