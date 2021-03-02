@@ -11,6 +11,7 @@ import {
   deviceStatusResponse,
 } from './settings';
 import { Bot } from './devices/bots';
+import { Plug } from './devices/plugs';
 import { Meter } from './devices/meters';
 import { Curtain } from './devices/curtains';
 import { Humidifier } from './devices/humidifiers';
@@ -47,6 +48,12 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     // only load if configured
     if (!this.config) {
       return;
+    }
+
+    // HOOBS notice
+    if (__dirname.includes('hoobs')) {
+      this.log.warn('This plugin has not been tested under HOOBS, it is highly recommended that ' +
+        'you switch to Homebridge: https://git.io/Jtxb0');
     }
 
     // verify the config
@@ -152,12 +159,12 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     this.config.options.fan.set_minStep;
     this.config.options.fan.set_min;
     this.config.options.fan.set_max;
-    
+
 
     // AirConditioner Config Options
     this.config.options.irair = this.config.options.irair || {};
     this.config.options.irair.hide_automode;
-    
+
 
     // Others Config Options
     this.config.options.other = this.config.options.other || {};
@@ -180,12 +187,12 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
       this.config.options!.pushRate! = 0.1;
       this.log.warn('Using Default Push Rate.');
     }
-  
 
-    if(!this.config.credentials) {
+
+    if (!this.config.credentials) {
       throw new Error('Missing Credentials');
     }
-    if(!this.config.credentials.openToken) {
+    if (!this.config.credentials.openToken) {
       throw new Error('Missing openToken');
     }
   }
@@ -245,6 +252,12 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
               this.log.info('Discovered %s %s', device.deviceName, device.deviceType);
             }
             this.createCurtain(device);
+            break;
+          case 'Plug':
+            if (this.config.devicediscovery) {
+              this.log.info('Discovered %s %s', device.deviceName, device.deviceType);
+            }
+            this.createPlug(device);
             break;
           case 'Remote':
             if (this.config.devicediscovery) {
@@ -363,7 +376,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId) && device.enableCloudService) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -382,7 +395,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId) && device.enableCloudService) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.deviceType, device.deviceId);
 
       // create a new accessory
@@ -421,7 +434,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId) && device.enableCloudService) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -440,7 +453,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId) && device.enableCloudService) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.deviceType, device.deviceId);
 
       if (!this.config.options?.bot?.device_press && !this.config.options?.bot?.device_switch) {
@@ -482,7 +495,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId) && device.enableCloudService) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -501,7 +514,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId) && device.enableCloudService) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.deviceType, device.deviceId);
 
       // create a new accessory
@@ -540,7 +553,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (this.isCurtainGrouped(device)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -559,7 +572,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (this.isCurtainGrouped(device)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.deviceType, device.deviceId);
       if (device.group && !this.config.options?.curtain?.disable_group) {
         this.log.warn(
@@ -611,6 +624,64 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     }
   }
 
+  private async createPlug(device: device) {
+    const uuid = this.api.hap.uuid.generate(`${device.deviceName}-${device.deviceId}-${device.deviceType}`);
+
+    // see if an accessory with the same uuid has already been registered and restored from
+    // the cached devices we stored in the `configureAccessory` method above
+    const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
+
+    if (existingAccessory) {
+      // the accessory already exists
+      if (!this.config.options?.hide_device.includes(device.deviceId) && device.enableCloudService) {
+        this.log.info(
+          'Restoring existing accessory from cache: %s DeviceID: %s',
+          existingAccessory.displayName,
+          device.deviceId,
+        );
+
+        // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
+        //existingAccessory.context.firmwareRevision = firmware;
+        //this.api.updatePlatformAccessories([existingAccessory]);
+        // create the accessory handler for the restored accessory
+        // this is imported from `platformAccessory.ts`
+        new Plug(this, existingAccessory, device);
+        this.log.debug(`${device.deviceType} UDID: ${device.deviceName}-${device.deviceId}-${device.deviceType}`);
+      } else {
+        this.unregisterPlatformAccessories(existingAccessory);
+      }
+    } else if (!this.config.options?.hide_device.includes(device.deviceId) && device.enableCloudService) {
+      // the accessory does not yet exist, so we need to create it
+      this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.deviceType, device.deviceId);
+
+      // create a new accessory
+      const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.deviceType}`, uuid);
+
+      // store a copy of the device object in the `accessory.context`
+      // the `context` property can be used to store any data about the accessory you may need
+      //accessory.context.firmwareRevision = firmware;
+      accessory.context.device = device;
+      // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
+      // create the accessory handler for the newly create accessory
+      // this is imported from `platformAccessory.ts`
+      new Plug(this, accessory, device);
+      this.log.debug(`${device.deviceType} UDID: ${device.deviceName}-${device.deviceId}-${device.deviceType}`);
+
+      // link the accessory to your platform
+      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      this.accessories.push(accessory);
+    } else {
+      if (this.config.devicediscovery) {
+        this.log.error(
+          'Unable to Register new device: %s %s - %s',
+          device.deviceName,
+          device.deviceType,
+          device.deviceId,
+        );
+      }
+    }
+  }
+
   private async createTV(device: irdevice) {
     const uuid = this.api.hap.uuid.generate(
       `${device.deviceName}-${device.deviceId}-${device.remoteType}-${device.hubDeviceId}`,
@@ -637,7 +708,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         `${device.remoteType} UDID: ${device.deviceName}-${device.deviceId}-${device.remoteType}-${device.hubDeviceId}`,
       );
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -682,7 +753,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -701,7 +772,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -740,7 +811,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -759,7 +830,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -798,7 +869,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -817,7 +888,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -856,7 +927,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -875,7 +946,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -914,7 +985,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -933,7 +1004,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -972,7 +1043,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -991,7 +1062,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -1030,7 +1101,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -1049,7 +1120,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -1088,7 +1159,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
     const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
 
     if (existingAccessory) {
-    // the accessory already exists
+      // the accessory already exists
       if (!this.config.options?.hide_device.includes(device.deviceId)) {
         this.log.info(
           'Restoring existing accessory from cache: %s DeviceID: %s',
@@ -1107,7 +1178,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         this.unregisterPlatformAccessories(existingAccessory);
       }
     } else if (!this.config.options?.hide_device.includes(device.deviceId)) {
-    // the accessory does not yet exist, so we need to create it
+      // the accessory does not yet exist, so we need to create it
       this.log.info('Adding new accessory: %s %s DeviceID: %s', device.deviceName, device.remoteType, device.deviceId);
 
       // create a new accessory
@@ -1139,7 +1210,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
   }
 
   public unregisterPlatformAccessories(existingAccessory: PlatformAccessory) {
-  // remove platform accessories when no longer present
+    // remove platform accessories when no longer present
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
     this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
   }
