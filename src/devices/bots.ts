@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue, HAPStatus } from 'homebridge';
 import { SwitchBotPlatform } from '../platform';
 import { interval, Subject } from 'rxjs';
 import { debounceTime, skipWhile, tap } from 'rxjs/operators';
@@ -15,10 +15,10 @@ export class Bot {
 
   On!: CharacteristicValue;
   OutletInUse!: CharacteristicValue;
-  deviceStatus!: any;
+  deviceStatus!: deviceStatusResponse;
 
   botUpdateInProgress!: boolean;
-  doBotUpdate!: any;
+  doBotUpdate!: Subject<unknown>;
 
   constructor(
     private readonly platform: SwitchBotPlatform,
@@ -213,6 +213,7 @@ export class Bot {
     if (!this.platform.config.options?.bot?.switch) {
       this.service.updateCharacteristic(this.platform.Characteristic.OutletInUse, e);
     }
+    new this.platform.api.hap.HapStatusError(HAPStatus.OPERATION_TIMED_OUT);
   }
 
   private statusCode(push: AxiosResponse<any>) {
