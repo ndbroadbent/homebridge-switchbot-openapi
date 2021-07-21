@@ -136,15 +136,21 @@ class AirConditioner {
         switch (value) {
             case this.platform.Characteristic.TargetHeaterCoolerState.AUTO:
                 this.CurrentMode = AirConditioner.MODE_AUTO;
+                this.Active = 1;
                 break;
             case this.platform.Characteristic.TargetHeaterCoolerState.COOL:
                 this.CurrentMode = AirConditioner.MODE_COOL;
+                this.Active = 1;
                 break;
             case this.platform.Characteristic.TargetHeaterCoolerState.HEAT:
                 this.CurrentMode = AirConditioner.MODE_HEAT;
+                this.Active = 1;
                 break;
             default:
                 break;
+        }
+        if (this.Active !== undefined) {
+            this.service.updateCharacteristic(this.platform.Characteristic.Active, this.Active);
         }
         this.pushAirConditionerStatusChanges();
     }
@@ -283,4 +289,8 @@ class AirConditioner {
     }
 }
 exports.AirConditioner = AirConditioner;
+// 1 (auto), 2 (cool), 3 (dry), 4 (fan), 5 (heat)
+AirConditioner.MODE_AUTO = 1;
+AirConditioner.MODE_COOL = 2;
+AirConditioner.MODE_HEAT = 5;
 //# sourceMappingURL=airconditioners.js.map

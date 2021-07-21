@@ -24,9 +24,11 @@ export class AirConditioner {
   CurrentFanSpeed!: number;
   Busy: any;
   Timeout: any = null;
-  static MODE_AUTO: number;
-  static MODE_COOL: number;
-  static MODE_HEAT: number;
+
+  // 1 (auto), 2 (cool), 3 (dry), 4 (fan), 5 (heat)
+  static MODE_AUTO = 1;
+  static MODE_COOL = 2;
+  static MODE_HEAT = 5;
   ValidValues: number[];
 
   constructor(
@@ -169,15 +171,21 @@ export class AirConditioner {
     switch (value) {
       case this.platform.Characteristic.TargetHeaterCoolerState.AUTO:
         this.CurrentMode = AirConditioner.MODE_AUTO;
+        this.Active = 1;
         break;
       case this.platform.Characteristic.TargetHeaterCoolerState.COOL:
         this.CurrentMode = AirConditioner.MODE_COOL;
+        this.Active = 1;
         break;
       case this.platform.Characteristic.TargetHeaterCoolerState.HEAT:
         this.CurrentMode = AirConditioner.MODE_HEAT;
+        this.Active = 1;
         break;
       default:
         break;
+    }
+    if (this.Active !== undefined) {
+      this.service.updateCharacteristic(this.platform.Characteristic.Active, this.Active);
     }
     this.pushAirConditionerStatusChanges();
   }

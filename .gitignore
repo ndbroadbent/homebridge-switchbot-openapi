@@ -1,6 +1,7 @@
 # Ignore compiled code
 
 #dist
+dist.tar.gz
 
 # ------------- Defaults -------------
 
