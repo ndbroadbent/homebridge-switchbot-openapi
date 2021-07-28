@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/)
 
+## [Version 3.5.0](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v3.4.4...v3.5.0) (2021-07-28)
+
+### Changes
+
+- Implemented Custom UI.
+- Housekeeping and updated dependencies.
+
 ## [Version 3.4.4](https://github.com/OpenWonderLabs/homebridge-switchbot-openapi/compare/v3.4.3...v3.4.4) (2021-07-22)
 
 ### Changes
