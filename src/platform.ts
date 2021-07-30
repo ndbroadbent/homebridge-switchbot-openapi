@@ -44,6 +44,7 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
   });
 
   debugMode!: boolean;
+  version = require('../package.json').version // eslint-disable-line @typescript-eslint/no-var-requires
 
   constructor(public readonly log: Logger, public readonly config: SwitchBotPlatformConfig, public readonly api: API) {
     this.log.debug('Finished initializing platform:', this.config.name);
@@ -399,7 +400,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
         //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.deviceType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Humidifier(this, existingAccessory, device);
@@ -416,8 +420,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.deviceType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -456,8 +462,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.deviceType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Bot(this, existingAccessory, device);
@@ -477,8 +485,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.deviceType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -517,8 +527,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.deviceType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Meter(this, existingAccessory, device);
@@ -535,8 +547,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.deviceType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -691,8 +705,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.deviceType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Curtain(this, existingAccessory, device);
@@ -722,8 +738,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.deviceType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -770,8 +788,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.deviceType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Plug(this, existingAccessory, device);
@@ -788,8 +808,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.deviceType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -828,8 +850,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
       );
 
       // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-      //existingAccessory.context.firmwareRevision = firmware;
-      //this.api.updatePlatformAccessories([existingAccessory]);
+      existingAccessory.context.model = device.remoteType;
+      existingAccessory.context.deviceID = device.deviceId;
+      existingAccessory.context.firmwareRevision = this.version;
+      this.api.updatePlatformAccessories([existingAccessory]);
       // create the accessory handler for the restored accessory
       // this is imported from `platformAccessory.ts`
       new TV(this, existingAccessory, device);
@@ -845,8 +869,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -891,8 +917,11 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+
+        existingAccessory.context.model = device.remoteType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Fan(this, existingAccessory, device);
@@ -909,8 +938,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -949,8 +980,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.remoteType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Light(this, existingAccessory, device);
@@ -967,8 +1000,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -1007,8 +1042,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.remoteType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new AirConditioner(this, existingAccessory, device);
@@ -1025,8 +1062,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -1065,8 +1104,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.remoteType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new AirPurifier(this, existingAccessory, device);
@@ -1083,8 +1124,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -1123,8 +1166,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.remoteType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new WaterHeater(this, existingAccessory, device);
@@ -1141,8 +1186,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -1181,8 +1228,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.remoteType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new VacuumCleaner(this, existingAccessory, device);
@@ -1199,8 +1248,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -1239,8 +1290,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.remoteType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Camera(this, existingAccessory, device);
@@ -1257,8 +1310,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
@@ -1297,8 +1352,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
         );
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        //existingAccessory.context.firmwareRevision = firmware;
-        //this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.model = device.remoteType;
+        existingAccessory.context.deviceID = device.deviceId;
+        existingAccessory.context.firmwareRevision = this.version;
+        this.api.updatePlatformAccessories([existingAccessory]);
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
         new Others(this, existingAccessory, device);
@@ -1315,8 +1372,10 @@ export class SwitchBotPlatform implements DynamicPlatformPlugin {
 
       // store a copy of the device object in the `accessory.context`
       // the `context` property can be used to store any data about the accessory you may need
-      //accessory.context.firmwareRevision = firmware;
       accessory.context.device = device;
+      accessory.context.model = device.remoteType;
+      accessory.context.deviceID = device.deviceId;
+      accessory.context.firmwareRevision = this.version;
       // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
