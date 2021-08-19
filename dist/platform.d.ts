@@ -15,6 +15,7 @@ export declare class SwitchBotPlatform implements DynamicPlatformPlugin {
     readonly accessories: PlatformAccessory[];
     axios: AxiosInstance;
     debugMode: boolean;
+    version: any;
     constructor(log: Logger, config: SwitchBotPlatformConfig, api: API);
     /**
      * This function is invoked when homebridge restores cached accessories from disk at startup.

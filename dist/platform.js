@@ -39,6 +39,7 @@ class SwitchBotPlatform {
         this.axios = axios_1.default.create({
             responseType: 'json',
         });
+        this.version = require('../package.json').version; // eslint-disable-line @typescript-eslint/no-var-requires
         this.log.debug('Finished initializing platform:', this.config.name);
         // only load if configured
         if (!this.config) {
@@ -354,7 +355,10 @@ class SwitchBotPlatform {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
                 //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.deviceType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new humidifiers_1.Humidifier(this, existingAccessory, device);
@@ -371,8 +375,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.deviceType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.deviceType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -399,8 +405,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId)) && device.enableCloudService) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.deviceType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new bots_1.Bot(this, existingAccessory, device);
@@ -420,8 +428,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.deviceType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.deviceType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -448,8 +458,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId)) && device.enableCloudService) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.deviceType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new meters_1.Meter(this, existingAccessory, device);
@@ -466,8 +478,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.deviceType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.deviceType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -586,8 +600,10 @@ class SwitchBotPlatform {
             if (this.isCurtainGrouped(device)) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.deviceType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new curtains_1.Curtain(this, existingAccessory, device);
@@ -615,8 +631,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.deviceType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.deviceType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -652,8 +670,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId)) && device.enableCloudService) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.deviceType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new plugs_1.Plug(this, existingAccessory, device);
@@ -670,8 +690,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.deviceType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.deviceType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -696,8 +718,10 @@ class SwitchBotPlatform {
         if (existingAccessory && !((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
             this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
             // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-            //existingAccessory.context.firmwareRevision = firmware;
-            //this.api.updatePlatformAccessories([existingAccessory]);
+            existingAccessory.context.model = device.remoteType;
+            existingAccessory.context.deviceID = device.deviceId;
+            existingAccessory.context.firmwareRevision = this.version;
+            this.api.updatePlatformAccessories([existingAccessory]);
             // create the accessory handler for the restored accessory
             // this is imported from `platformAccessory.ts`
             new tvs_1.TV(this, existingAccessory, device);
@@ -710,8 +734,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -742,8 +768,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.remoteType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new fans_1.Fan(this, existingAccessory, device);
@@ -760,8 +788,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -788,8 +818,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.remoteType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new lights_1.Light(this, existingAccessory, device);
@@ -806,8 +838,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -834,8 +868,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.remoteType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new airconditioners_1.AirConditioner(this, existingAccessory, device);
@@ -852,8 +888,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -880,8 +918,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.remoteType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new airpurifiers_1.AirPurifier(this, existingAccessory, device);
@@ -898,8 +938,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -926,8 +968,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.remoteType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new waterheaters_1.WaterHeater(this, existingAccessory, device);
@@ -944,8 +988,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -972,8 +1018,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.remoteType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new vacuumcleaners_1.VacuumCleaner(this, existingAccessory, device);
@@ -990,8 +1038,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -1018,8 +1068,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.remoteType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new cameras_1.Camera(this, existingAccessory, device);
@@ -1036,8 +1088,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
@@ -1064,8 +1118,10 @@ class SwitchBotPlatform {
             if (!((_a = this.config.options) === null || _a === void 0 ? void 0 : _a.hide_device.includes(device.deviceId))) {
                 this.log.info('Restoring existing accessory from cache: %s DeviceID: %s', existingAccessory.displayName, device.deviceId);
                 // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-                //existingAccessory.context.firmwareRevision = firmware;
-                //this.api.updatePlatformAccessories([existingAccessory]);
+                existingAccessory.context.model = device.remoteType;
+                existingAccessory.context.deviceID = device.deviceId;
+                existingAccessory.context.firmwareRevision = this.version;
+                this.api.updatePlatformAccessories([existingAccessory]);
                 // create the accessory handler for the restored accessory
                 // this is imported from `platformAccessory.ts`
                 new others_1.Others(this, existingAccessory, device);
@@ -1082,8 +1138,10 @@ class SwitchBotPlatform {
             const accessory = new this.api.platformAccessory(`${device.deviceName} ${device.remoteType}`, uuid);
             // store a copy of the device object in the `accessory.context`
             // the `context` property can be used to store any data about the accessory you may need
-            //accessory.context.firmwareRevision = firmware;
             accessory.context.device = device;
+            accessory.context.model = device.remoteType;
+            accessory.context.deviceID = device.deviceId;
+            accessory.context.firmwareRevision = this.version;
             // accessory.context.firmwareRevision = findaccessories.accessoryAttribute.softwareRevision;
             // create the accessory handler for the newly create accessory
             // this is imported from `platformAccessory.ts`
